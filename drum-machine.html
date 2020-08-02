@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html>
+    <header>
+        <title>Drum Machine</title>
+        <meta charset="utf-8" />
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+        
+        <style type="text/css">
+
+        @import url('https://fonts.googleapis.com/css2?family=Monoton&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+        html, body {
+            font-size: 10px;
+            font-family: 'Monoton', cursive;
+            background: #9c87fa; 
+            color: #994305;
+        }
+
+        #title {
+            font-size: 3rem;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        #drum-machine{
+            width: 50%;
+            height: 80vh;
+            min-width: 600px;
+            min-height: 500px;
+            margin: auto;
+            margin-top: 10vh;
+            background: #87CEFA;
+            border:3px solid navy;
+            border-radius: 15%;
+        }
+
+        #service {
+            position: relatie;
+            margin: 2rem 0;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-around;
+        }
+
+        #display {
+            width: 60%;
+            background: #B0E0E6;
+            border: 3px solid navy;
+            border-radius: 15px;
+            font-family: 'Press Start 2P', cursive;
+            text-align: center;
+            font-size: 2rem;
+            padding: 1rem;
+        }
+
+        #power-switch {
+            width: 20%;
+            text-align: center;
+            font-size: 2rem;
+             
+        }
+
+        #pad {
+            height: 60%;
+            width: 90%;
+            margin: auto 5%;
+            position: relative;
+            display: grid;
+            grid-template-rows: 1fr 1fr 1fr;
+            grid-template-columns: 1fr 1fr 1fr;
+            grid-gap: 2vw;
+        }
+
+        .drum-pad {
+            background: #B0E0E6;
+            border: 2px solid navy;
+            border-radius: 20%;
+            box-shadow: 3px 3px  5px 0 #000;
+            font-size: 3rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+        }
+
+        .drum-pad:active {
+            background: red;
+            color: white;
+            transform: scale(0.95);
+            box-shadow: none;
+        }
+  
+        /* Power Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {display:none;}
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #B0E0E6;
+            border: 2px solid navy;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 2px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        input:checked + .slider {
+            background-color: red;
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px red;
+        }
+
+        input:checked + .slider:before {
+            -webkit-transform: translateX(22px);
+            -ms-transform: translateX(220px);
+            transform: translateX(22px);
+        }
+        /* End Power Switch */
+        
+        </style>
+    </header>
+    <body>
+        <div id="app"></div>
+
+        <script crossorigin src="https://unpkg.com/react@16/umd/react.production.min.js"></script>
+        <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.25.0/babel.min.js"></script>
+
+        <script type="text/babel">
+
+                const data = [{
+                        keyCode: 81,
+                        keyTrigger: 'Q',
+                        id: 'Chord-1',
+                        url: 'https://s3.amazonaws.com/freecodecamp/drums/Chord_1.mp3'
+                    }, {
+                        keyCode: 87,
+                        keyTrigger: 'W',
+                        id: 'Chord-2',
+                        url: 'https://s3.amazonaws.com/freecodecamp/drums/Chord_2.mp3'
+                    }, {
+                        keyCode: 69,
+                        keyTrigger: 'E',
+                        id: 'Chord-3',
+                        url: 'https://s3.amazonaws.com/freecodecamp/drums/Chord_3.mp3'
+                    }, {
+                        keyCode: 65,
+                        keyTrigger: 'A',
+                        id: 'Side-Stick',
+                        url: 'https://s3.amazonaws.com/freecodecamp/drums/side_stick_1.mp3'
+                    }, {
+                        keyCode: 83,
+                        keyTrigger: 'S',
+                        id: 'Snare',
+                        url: 'https://s3.amazonaws.com/freecodecamp/drums/Brk_Snr.mp3'
+                    }, {
+                        keyCode: 68,
+                        keyTrigger: 'D',
+                        id: 'Open-HH',
+                        url: 'https://s3.amazonaws.com/freecodecamp/drums/Dsc_Oh.mp3'
+                    }, {
+                        keyCode: 90,
+                        keyTrigger: 'Z',
+                        id: "Kick-n'-Hat",
+                        url: 'https://s3.amazonaws.com/freecodecamp/drums/Kick_n_Hat.mp3'
+                    }, {
+                        keyCode: 88,
+                        keyTrigger: 'X',
+                        id: 'Kick',
+                        url: 'https://s3.amazonaws.com/freecodecamp/drums/RP4_KICK_1.mp3'
+                    }, {
+                        keyCode: 67,
+                        keyTrigger: 'C',
+                        id: 'Closed-HH',
+                        url: 'https://s3.amazonaws.com/freecodecamp/drums/Cev_H2.mp3'
+                }];
+
+
+                class DrumMachine extends React.Component{
+                    constructor(props){
+                        super(props);
+                        this.state = {
+                            power: false,
+                            url: '',
+                            display: 'Power OFF'
+                        };
+                        this.handlePower = this.handlePower.bind(this);
+                        this.playSound = this.playSound.bind(this);
+                        this.handleKeyPress = this.handleKeyPress.bind(this);
+                    }
+
+                    componentDidMount() {
+                        document.addEventListener('keydown', this.handleKeyPress);
+                    }
+                    componentWillUnmount() {
+                        document.removeEventListener('keydown', this.handleKeyPress);
+                    }
+
+                    handleKeyPress(e) {
+                        if (data.some(function(item) { return item.keyCode===e.keyCode})) {
+                            /* FIX! make style change for pres with KB */
+                            this.playSound(e);
+                        }
+                    }
+
+                    playSound(e) {
+                        if (this.state.power){
+                            let  posInArray;
+                            
+                            if(e.type==="keydown"){
+                                data.forEach(function(item, index){
+                                    if(e.keyCode===item.keyCode){
+                                        posInArray = index;
+                                        }
+                                    });
+                            }else{
+                                posInArray =  e.target.id;
+                            }
+                            
+                            const sound = document.getElementById(data[posInArray].keyTrigger);
+                            sound.currentTime = 0;
+                            sound.play();
+                            this.setState({display: data[posInArray].id});
+                        }
+                    }
+                    
+                    handlePower() {
+                        this.setState({power: !this.state.power});
+                        if (!this.state.power===false){
+                            this.setState({display: "Power OFF"})
+                            }else{
+                                this.setState({display: "Hello!"})
+                            };
+                    }
+
+                    render(){
+                        return (
+                            <div id="drum-machine">
+                                <div id="title"><i class="fa fa-music" aria-hidden="true"></i> Drum Machine
+                                    <i class="fa fa-music" aria-hidden="true"></i></div>
+                                <div id="service">
+                                    <div id="display">{this.state.display}</div>
+                                    <div id="power-switch">POWER                                         
+                                        <label class="switch">
+                                            <input type='checkbox' defaultChecked={this.state.power} onChange={this.handlePower} />
+                                            <span class="slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div id="pad">
+                                     
+                                    {data.map((item, i) =>
+                                        <div className="drum-pad" 
+                                            id={i}
+                                            key={i}
+                                            onClick={this.playSound}>
+                                                <audio className='clip' id={item.keyTrigger} src={item.url}></audio>
+                                                {item.keyTrigger}
+                                        </div> 
+                                    )}
+
+                                </div>
+                            </div>
+                        );
+                    }
+                }
+
+
+            ReactDOM.render(
+                <DrumMachine />,
+                document.getElementById("app")
+            );
+        </script>
+    </body>
+</html>

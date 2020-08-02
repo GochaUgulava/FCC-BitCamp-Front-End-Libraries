@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html>
+    <header>
+        <title>JS Calculator</title>
+        <meta charset="utf-8" />
+        
+        <style type="text/css">
+
+            @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300&display=swap');
+            @import url('https://fonts.googleapis.com/css2?family=Arima+Madurai:wght@100&display=swap');
+
+            body {
+                font-size: 10px;
+                margin: 0;
+                padding: 0;
+            }
+
+            #calculator {
+                position: relative;
+                width: 300px;
+                height: 450px;
+                margin: auto;
+                margin-top: 10vh;
+                border: 10px solid black;
+                box-shadow: 5px 5px  10px 0 #000;
+                background-color: black;
+            }
+
+            #pad {
+                height: 79%;
+                display: grid;
+                grid-template:
+                "clear clear divide multiply"
+                "seven eight nine substract"
+                "four five six add"
+                "one two three equals"
+                "zero zero decimal equals";
+            }
+
+            .key {
+                border: 1px solid black;
+                background-color: blue;
+                color: white;
+                font-size: 2rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                font-family: 'Arima Madurai', cursive;
+            }
+
+            .key:hover {
+                color: grey;
+                opacity: 0.8;
+            }
+
+            .key:focus {
+                outline: none;
+            }
+
+            #formula, #display {
+                width: 100%;
+                height: 10%;
+                border: 1px solid, black;
+                background-color: 	#708090;
+                color: white;
+                font-weight: bold;
+                text-align: right;
+                font-family: 'DM Mono', monospace;
+            }
+
+            #display {
+                font-size: 2.5rem;
+                border-bottom: 5px solid black;
+            }
+
+            #formula {
+                font-size: 1.5rem;
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+            }
+
+            #clear {
+                grid-area: clear;
+                background-color: red;
+            }
+
+            #equals {
+                grid-area: equals;
+                background-color: navy;
+            }
+
+            #zero {
+                grid-area: zero;
+            }
+
+
+        </style>
+    </header>
+    <body>
+        <div id="app"></div>
+
+    <script crossorigin src="https://unpkg.com/react@16/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.25.0/babel.min.js"></script>
+     
+     
+    <script type="text/babel">
+
+        const DIGITLIMIT = 13;
+        const FORMULADIGITLIMIT = 21;
+
+        class Calculator extends React.Component {
+            constructor(props){
+                super(props);
+                this.state = {
+                            formula: '',
+                            display: "0",
+                            isDecimal: false,
+                            digitLimit: false,
+                            equalPressed: false
+                };
+                this.clearHandle=this.clearHandle.bind(this);
+                this.numberHandle=this.numberHandle.bind(this);
+                this.decimalHandle=this.decimalHandle.bind(this);
+                this.operationHandle=this.operationHandle.bind(this);
+                this.equalsHandle=this.equalsHandle.bind(this);
+            }
+
+            clearHandle(){
+                this.setState({
+                                formula: '',
+                                display: "0",
+                                isDecimal: false,
+                                digitLimit: false,
+                                equalPressed: false
+                                });
+            }
+
+            numberHandle(e){
+                if (!this.state.digitLimit){
+
+                    if (this.state.display.length===DIGITLIMIT-1) {
+                        this.setState({display: "DIGIT LIMIT", digitLimit: true});
+                    }else{
+                        if(this.state.equalPressed){
+                            this.setState({formula: '', equalPressed: false,
+                                            isDecimal: false, display: e.target.value});
+                        }else{
+                            if (this.state.display==="0"){
+                                if (e.target.value==="0"){
+                                    this.setState({display: "0"});
+                                }else{
+                                    this.setState({display: e.target.value});
+                                }
+                            }else if(this.state.display==="*" || this.state.display==="/" ||
+                                    this.state.display==="+" || this.state.display==="-"){
+                                        this.setState({formula: this.state.formula + this.state.display, 
+                                                        display: e.target.value, isDecimal: false});
+                            }else{
+                                this.setState({display: this.state.display + e.target.value});
+                            }
+                        }
+                    }
+                     
+                    
+                }
+            } 
+
+            decimalHandle() {
+                if (!this.state.digitLimit){
+                    if (!this.state.isDecimal){
+                        if (this.state.display.length===DIGITLIMIT-1) {
+                            this.setState({display: "DIGIT LIMIT", digitLimit: true});
+                        }else{
+                            if (this.state.equalPressed){
+                                this.setState({formula: '', equalPressed: false,
+                                            isDecimal: true, display: '0.'});
+                            }else{
+                                if (this.state.display==="0"){
+                                        this.setState({display: "0.", isDecimal: true});
+                                }else if (this.state.display==="*" || this.state.display==="/" ||
+                                        this.state.display==="+" || this.state.display==="-"){
+                                            this.setState({formula: this.state.formula+this.state.display,
+                                                            display: "0.",  isDecimal: true});
+                                }else{
+                                    this.setState({display: this.state.display + ".", isDecimal: true});
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            operationHandle(e){
+                if (!this.state.digitLimit){
+                    if (this.state.equalPressed){
+                        this.setState({formula: this.state.display, equalPressed: false,
+                                            isDecimal: false, display: e.target.value});
+                    }else{
+                        if (this.state.display.charAt(this.state.display.length-1)==='.'){
+                            this.setState({formula: this.state.formula + this.state.display + "0", 
+                                            isDecimal: false, display: e.target.value});
+                        }else{
+                            if (this.state.display==="+" || this.state.display==="/" || this.state.display==="*"){
+                
+                                if (e.target.value==="-"){
+                                    this.setState({formula: this.state.formula+this.state.display, 
+                                                    isDecimal: false, display: e.target.value});
+                                }else{
+                                    this.setState({display: e.target.value});
+                                }
+                              
+                            }else if (this.state.display==="-") {
+                                if (this.state.formula.charAt(this.state.formula.length-1)==='*' ||
+                                    this.state.formula.charAt(this.state.formula.length-1)==='/' ||
+                                    this.state.formula.charAt(this.state.formula.length-1)==='+'){
+                                    this.setState({formula: this.state.formula.slice(0, -1), display: e.target.value});
+                                }else{
+                                    this.setState({display: e.target.value});
+                                }
+
+                            }else{
+                                this.setState({formula: this.state.formula + this.state.display, 
+                                                isDecimal: false, display: e.target.value});
+                            }
+                        }
+                    }
+                }
+            }
+
+            equalsHandle(){
+                if (!this.state.digitLimit){
+                    if (!this.state.equalPressed){    
+                        let newFormula;
+                        if(this.state.display==="*" || this.state.display==="/" ||
+                                    this.state.display==="+" || this.state.display==="-"){
+                            newFormula = this.state.formula;
+                        }else if (this.state.display.charAt(this.state.display.length-1)==='.'){
+                            newFormula = this.state.formula + this.state.display + "0";
+                        }else {
+                            newFormula = this.state.formula + this.state.display;
+                        }
+
+                        let result = (Math.round(eval(newFormula)*10000)/10000).toString();
+
+                        if (result.length>DIGITLIMIT){
+                            this.setState({formula: '',
+                                            display: "DIGIT LIMIT",
+                                            digitLimit: true
+                                            });
+                        }else{
+                            this.setState({formula: newFormula + "=" + result,
+                                            display: result, equalPressed: true
+                                            });
+                        }
+                    }
+               }
+            }
+
+            render(){
+                return(
+                    <div id="calculator">
+
+                        <div id="formula">
+                            {(this.state.formula.length>FORMULADIGITLIMIT)?
+                                "..."+this.state.formula.slice(-(FORMULADIGITLIMIT-4)):this.state.formula}
+                            </div>
+                        <div id="display">{this.state.display}</div>
+                        <div id="pad">
+                            <button class="key" id="clear" value="c" onClick={this.clearHandle}>C</button>
+                            <button class="key" id="divide" value="/"  onClick={this.operationHandle}>/</button>
+                            <button class="key" id="multiply" value="*"  onClick={this.operationHandle}>*</button>
+                            <button class="key" id="seven" value="7" onClick={this.numberHandle}>7</button>
+                            <button class="key" id="eight" value="8" onClick={this.numberHandle}>8</button>
+                            <button class="key" id="nine" value="9" onClick={this.numberHandle}>9</button>
+                            <button class="key" id="subtract" value="-"  onClick={this.operationHandle}>-</button>
+                            <button class="key" id="four" value="4" onClick={this.numberHandle}>4</button>
+                            <button class="key" id="five" value="5" onClick={this.numberHandle}>5</button>
+                            <button class="key" id="six" value="6" onClick={this.numberHandle}>6</button>
+                            <button class="key" id="add" value="+"  onClick={this.operationHandle}>+</button>
+                            <button class="key" id="one" value="1" onClick={this.numberHandle}>1</button>
+                            <button class="key" id="two" value="2" onClick={this.numberHandle}>2</button>
+                            <button class="key" id="three" value="3" onClick={this.numberHandle}>3</button>
+                            <button class="key" id="equals" value="=" onClick={this.equalsHandle}>=</button>
+                            <button class="key" id="zero" value="0" onClick={this.numberHandle}>0</button>
+                            <button class="key" id="decimal" value="."  onClick={this.decimalHandle}>.</button>
+                        </div>
+
+                    </div>
+                );
+            };
+        }
+
+        ReactDOM.render(
+            <Calculator />,
+            document.getElementById("app")
+        )
+    </script>
+    </body>
+</html>

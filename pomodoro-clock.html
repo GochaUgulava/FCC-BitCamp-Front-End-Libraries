@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+    <header>
+        <title>Pomodoro Clock</title>
+        <meta charset="utf-8" />
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+
+        <style type="text/css">
+
+        @import url(https://allfont.net/allfont.css?fonts=digital-7-mono);
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron&display=swap');
+              
+        body {
+            font-size: 10px;
+            color: white;
+       }
+        
+        #clock {
+            width: 600px;
+            height: 400px;
+            margin: auto;
+            margin-top: 5%;
+            background-color: black;
+            border: 7px solid brown;
+            border-radius: 20%;
+            box-shadow: 20px 20px  40px 0 gray;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: stretch;
+        }
+
+        #adjust {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+            height: 25%;
+            margin-top:  5%;
+        }
+
+        #break {
+            float: left;
+            width: 40%;
+            margin: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #session {
+            float: right;
+            width: 40%;
+            margin: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .labels {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            text-align: center;
+        }
+
+        .btn-1 {
+            cursor: pointer;
+        }
+
+        #break-length, #session-length {
+            font-family: 'Digital-7 Mono', arial;
+            font-size: 2.5rem;
+            text-align: center;
+        }
+
+        #timer-label {
+            height: 15%;
+            font-family: 'Digital-7 Mono', arial;
+            font-size: 2.5rem;
+        }
+
+        #time-left {
+            height: 33%;
+            font-family: 'Digital-7 Mono', arial;
+            font-size: 6rem;
+        }
+
+        .btn-2 {
+            width: 100px;
+            height: 40px;
+            cursor: pointer;
+        }
+
+        </style>
+    </header>
+    <body>
+        <div id="app"></div>
+
+    <script crossorigin src="https://unpkg.com/react@16/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.25.0/babel.min.js"></script>
+
+     
+    <script type="text/babel">
+
+        let timerPomodoro;
+
+        class Clock extends React.Component {
+            constructor(props){
+                super(props);
+                this.state = {
+                    minutes: "25",
+                    seconds: "00",
+                    status: "session",
+                    timerOn: false,
+                    breakLength: "05",
+                    sessionLength: "25"
+                }
+            this.reset = this.reset.bind(this);
+            this.increaseBreak = this.increaseBreak.bind(this);
+            this.decreaseBreak = this.decreaseBreak.bind(this);
+            this.increaseSession = this.increaseSession.bind(this);
+            this.decreaseSession = this.decreaseSession.bind(this);
+            this.startStop = this.startStop.bind(this);
+            this.timer = this.timer.bind(this);
+            }
+
+            reset(){
+                clearInterval(this.timerPomodoro);
+                this.setState({
+                    minutes: "25",
+                    seconds: "00",
+                    status: "session",
+                    timerOn: false,
+                    breakLength: "05",
+                    sessionLength: "25"
+                })
+            }
+
+            increaseBreak() {
+                 if (this.state.breakLength<60 && !this.state.timerOn) {
+                    let newValue = parseInt(this.state.breakLength) + 1;
+                    newValue = (newValue < 10)? "0" + newValue: newValue.toString();
+                    this.setState({breakLength: newValue});
+                    if (this.state.status==="break"){
+                        this.setState({minutes: newValue});
+                    }
+                 }
+            }
+
+            decreaseBreak() {
+                 if (this.state.breakLength>1 && !this.state.timerOn) {
+                    let newValue = parseInt(this.state.breakLength) - 1;
+                    newValue = (newValue < 10)? "0" + newValue: newValue.toString();
+                    this.setState({breakLength: newValue});
+                    if (this.state.status==="break"){
+                        this.setState({minutes: newValue});
+                    } 
+                 }
+            }
+
+            increaseSession() {
+                 if (this.state.sessionLength<60 && !this.state.timerOn) {
+                    let newValue = parseInt(this.state.sessionLength) + 1;
+                    newValue = (newValue < 10)? "0" + newValue: newValue.toString();
+                    this.setState({sessionLength: newValue});
+                    if (this.state.status==="session"){
+                        this.setState({minutes: newValue});
+                    }
+                 }
+            }
+
+            decreaseSession() {
+                 if (this.state.sessionLength>1 && !this.state.timerOn) {
+                    let newValue = parseInt(this.state.sessionLength) - 1;
+                    newValue = (newValue < 10)? "0" + newValue: newValue.toString();
+                    this.setState({sessionLength: newValue, minutes: newValue});
+                    if (this.state.status==="session"){
+                        this.setState({minutes: newValue});
+                    } 
+                 }
+            }
+
+            startStop(){
+                if (this.state.timerOn) {
+                    clearInterval(this.timerPomodoro);
+                }else{
+                    this.timerPomodoro = setInterval(this.timer, 1000); 
+                }
+                this.setState({timerOn: !this.state.timerOn});
+            }
+
+            timer(){
+                let currentMinutes = parseInt(this.state.minutes);
+                let currentSeconds = parseInt(this.state.seconds);
+                let currentStatus = this.state.status;
+                let newMinutes;
+                let newSeconds;
+                let newStatus;
+                
+                if (currentMinutes===0 && currentSeconds===0){
+                    if (currentStatus === "session") {
+                        newStatus = "break";
+                        newMinutes = parseInt(this.state.breakLength)-1;
+                    }else{
+                        newStatus = "session";
+                        newMinutes = parseInt(this.state.sessionLength)-1;
+                    }
+                    newSeconds = 59;
+                    this.audioBeep.play();
+
+                }else{
+                    if (currentSeconds===0){
+                        newMinutes = currentMinutes - 1;
+                        newSeconds = 59;
+                        newStatus = currentStatus;
+                    }else{
+                        newMinutes = currentMinutes;
+                        newSeconds = currentSeconds -1;
+                        newStatus = currentStatus;
+                    }
+                }
+
+                newMinutes = (newMinutes < 10)? "0" + newMinutes: newMinutes.toString();
+                newSeconds = (newSeconds < 10)? "0" + newSeconds: newSeconds.toString();
+                this.setState({minutes: newMinutes, seconds: newSeconds, status: newStatus});
+
+            }
+
+
+            render(){
+                return (
+                    <div id="clock">
+                        <div id="adjust">
+                            <div id="break">
+                                <div className="labels" id="break-label">BREAK</div>
+                                <button className="btn-1" id="break-increment" onClick={this.increaseBreak}>
+                                    <i class="fa fa-chevron-up" aria-hidden="true"></i></button>
+                                <div id="break-length">{this.state.breakLength}</div>
+                                <button className="btn-1" id="break-decrement" onClick={this.decreaseBreak}>
+                                    <i class="fa fa-chevron-down" aria-hidden="true"></i></button>
+                            </div>
+                            <div id="session">
+                                <div className="labels" id="session-label">SESSION</div>
+                                <button className="btn-1" id="session-increment" onClick={this.increaseSession}>
+                                    <i class="fa fa-chevron-up" aria-hidden="true"></i></button>
+                                <div id="session-length">{this.state.sessionLength}</div>
+                                <button className="btn-1" id="session-decrement" onClick={this.decreaseSession}>
+                                    <i class="fa fa-chevron-down" aria-hidden="true"></i></button>
+                            </div>
+                        </div>
+                        <div id="timer-label">{this.state.status}</div>
+                        <div id="time-left">
+                            {this.state.minutes}:{this.state.seconds}
+                        </div>
+                        <div id="keys">
+                            <button className="btn-2" id="start_stop" onClick={this.startStop}><i class="fa fa-play" aria-hidden="true"></i>
+                                <i class="fa fa-pause" aria-hidden="true"></i></button>
+                            <button className="btn-2" id="reset" onClick={this.reset}>
+                                <i class="fa fa-repeat" aria-hidden="true"></i></button>
+                        </div>
+                        <audio id="beep" preload="auto"
+                            src="https://raw.githubusercontent.com/freeCodeCamp/cdn/master/build/testable-projects-fcc/audio/BeepSound.wav"
+                            ref={(audio) => {this.audioBeep = audio; }}  />
+                    </div>
+                );
+            }
+        }
+
+        ReactDOM.render(
+            <Clock />,
+            document.getElementById("app")
+        ) 
+    </script>
+    </body>
+</html>
