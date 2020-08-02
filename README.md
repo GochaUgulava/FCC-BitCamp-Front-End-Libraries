@@ -1,5 +1,5 @@
 # BitCamp-stage2-3-Front-End-Libraries
-Projects from bitcamp stage 2-1 (Bootstrap, jQuery, Sass, React and Redux)
+Projects from bitcamp stage 2-3 (Bootstrap, jQuery, Sass, React and Redux)
 
 Projects form freecodecamp "Introduction to the Responsive Web Design Projects" challenge. 
 In this section, there are the following projects with Bootstrap, jQuery, Sass, React and Redux:
